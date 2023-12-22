@@ -310,11 +310,12 @@ EOF_CAT
     if [ -n "$IPV4_ENABLED" ]; then
         cat >> ${DEPLOY_DIR}/${WORKER}_nncp.yaml <<EOF_CAT
       ipv4:
-        address:
-        - ip: ${CTLPLANE_IP_ADDRESS_PREFIX}.${CTLPLANE_IP_ADDRESS_SUFFIX}
-          prefix-length: 24
+#        address:
+#        - ip: ${CTLPLANE_IP_ADDRESS_PREFIX}.${CTLPLANE_IP_ADDRESS_SUFFIX}
+#          prefix-length: 24
         enabled: true
-        dhcp: false
+#        dhcp: false
+        dhcp: true
 EOF_CAT
     else
         cat >> ${DEPLOY_DIR}/${WORKER}_nncp.yaml <<EOF_CAT
@@ -338,6 +339,36 @@ EOF_CAT
         enabled: false
 EOF_CAT
     fi
+    cat >> ${DEPLOY_DIR}/${WORKER}_nncp.yaml <<EOF_CAT
+    - description: openstack external network
+      name: enp4s0.433
+      state: up
+      type: vlan
+      vlan:
+        base-iface: enp4s0
+        id: 433
+      ipv4:
+        enabled: true
+        dhcp: true
+      ipv6:
+        enabled: false
+    - description: Configuring br-access bridge  with interface enp4s0
+      name: br-access
+      mtu: 1500
+      type: linux-bridge
+      state: up
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+          - name: enp4s0
+      ipv4:
+        enabled: false
+        dhcp: false
+      ipv6:
+        enabled: false
+EOF_CAT
     if [ -n "$BGP" ]; then
         cat >> ${DEPLOY_DIR}/${WORKER}_nncp.yaml <<EOF_CAT
     - description: Configuring ${INTERFACE_BGP_1}
